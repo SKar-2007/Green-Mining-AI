@@ -42,5 +42,19 @@ r = requests.get('http://127.0.0.1:5000/api/health')
 print(r.json())
 srv.terminate()
 PYTHON
+      - name: Quick training smoke test
+        run: |
+          source venv/bin/activate
+          # create a minimal synthetic dataset
+          python backend/scripts/generate_synthetic_data.py --output data/train/images --count 1
+          python backend/scripts/generate_synthetic_data.py --output data/val/images --count 1
+          cat > data/components.yaml <<'YAML'
+train: train
+val: val
+names:
+  0: IC
+YAML
+          # run one epoch of training to ensure script works
+          python backend/scripts/train_model.py --epochs 1
 
 default-ci: true
