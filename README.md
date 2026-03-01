@@ -10,6 +10,20 @@ This repository contains the MVP for the Green Mining AI project developed durin
    cd Green-Mining-AI
    ```
 
+   #### Installing Docker
+
+   On Linux (Ubuntu/Debian):
+   ```bash
+   sudo apt update
+   sudo apt install docker.io docker-compose
+   sudo systemctl enable --now docker
+   sudo usermod -aG docker $USER   # log out and back in afterwards
+   ```
+
+   On macOS/Windows: download Docker Desktop from https://www.docker.com/
+   (the rest of this guide uses `docker-compose`.)
+
+
 2. **Python environment** (recommended Python 3.11)
    ```bash
    python3.11 -m venv .venv     # install python3.11 if you don't have it
@@ -49,6 +63,24 @@ This repository contains the MVP for the Green Mining AI project developed durin
 ## 🛠️ Project structure
 
 ## 🧠 Training the YOLO model
+
+### Generating a demo dataset
+
+If you don't yet have real component photos, you can quickly create a
+synthetic dataset to verify training and inference. A helper script is
+provided:
+
+```bash
+# create 100 training images and 20 validation images
+python backend/scripts/generate_synthetic_data.py --output data/train/images --count 100
+python backend/scripts/generate_synthetic_data.py --output data/val/images --count 20
+```
+
+The script draws random colored rectangles and writes matching YOLO
+labels. Replace these with actual images once available.
+
+
+## 🛠️ Project structure
 
 Training requires the `ultralytics` package which is only compatible with Python 3.11.
 There are two recommended ways to run the training script:
