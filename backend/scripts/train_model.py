@@ -1,11 +1,29 @@
-from ultralytics import YOLO
+# training script for YOLOv8 model
+# This file is intended to be run either in a Python 3.11 environment
+# (see README) or inside the Docker container (which uses 3.11-slim).
+
+try:
+    from ultralytics import YOLO
+except ImportError:
+    print("ERROR: ultralytics/Yolov8 library not available.\n"
+          "Please run this script with Python 3.11 or inside the docker container.\n"
+          "Example: docker-compose run --rm backend python backend/scripts/train_model.py")
+    exit(1)
+
+import os
 
 
 def train():
-    # load pretrained small model
+    data_config = os.path.join(os.getcwd(), '..', '..', 'data', 'components.yaml')
+    if not os.path.exists(data_config):
+        print(f"Dataset config not found at {data_config}. Please create the data folder and add images/labels.")
+        return
+
+    # load pretrained small model (nano)
     model = YOLO('yolov8n.pt')
+    print("Starting training. This may take some time...")
     results = model.train(
-        data='../../data/components.yaml',
+        data=data_config,
         epochs=50,
         imgsz=640,
         batch=16,
@@ -18,7 +36,10 @@ def train():
     print(f"mAP50-95: {metrics.box.map}")
 
     # save best model weight to the backend/models folder
-    model.export(format='pt', imgsz=640)
+    export_path = os.path.join('..', 'models')
+    os.makedirs(export_path, exist_ok=True)
+    model.export(format='pt', imgsz=640, directory=export_path)
+    print(f"Model exported to {export_path}")
 
 
 if __name__ == '__main__':

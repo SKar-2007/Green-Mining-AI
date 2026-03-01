@@ -47,6 +47,42 @@ This repository contains the MVP for the Green Mining AI project developed durin
    (this also brings up a MongoDB container)
 
 ## 🛠️ Project structure
+
+## 🧠 Training the YOLO model
+
+Training requires the `ultralytics` package which is only compatible with Python 3.11.
+There are two recommended ways to run the training script:
+
+1. **Using the included Docker container** (preferred)
+   ```bash
+   # build images if you haven't already
+   cd docker
+   docker-compose build
+
+   # run training inside the backend service container
+   docker-compose run --rm backend python backend/scripts/train_model.py
+   ```
+   the container uses a python:3.11 base and has all dependencies installed.
+
+2. **On the host machine with Python 3.11**
+   ```bash
+   python3.11 -m venv .venv11
+   source .venv11/bin/activate
+   pip install -r requirements.txt
+   python backend/scripts/train_model.py
+   ```
+
+Before running, populate `data/train/images` (and `data/val/images`) with
+labeled PCB/component photos and make sure `data/components.yaml` points to
+those directories.
+
+If the script cannot import `ultralytics` it will print an error and exit.
+
+Training outputs a new weights file and also exports a `.pt` model to
+`backend/models` when finished.
+
+
+## 🛠️ Project structure
 ```
 green-mining-ai/
 ├── backend/            # Flask API, model and DB code
