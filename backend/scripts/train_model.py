@@ -22,9 +22,13 @@ def train():
     # load pretrained small model (nano)
     model = YOLO('yolov8n.pt')
     print("Starting training. This may take some time...")
+    # if only a handful of images present, reduce epochs for quick runs
+    count = sum(len(files) for _, _, files in os.walk(os.path.dirname(data_config)))
+    epochs = 3 if count < 200 else 50
+    print(f"Using {epochs} epochs (dataset count {count})")
     results = model.train(
         data=data_config,
-        epochs=50,
+        epochs=epochs,
         imgsz=640,
         batch=16,
         name='ewaste_detector',
