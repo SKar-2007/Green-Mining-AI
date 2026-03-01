@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  python-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          python -m venv venv
+          source venv/bin/activate
+          pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install flake8
+      - name: Run flake8
+        run: |
+          source venv/bin/activate
+          flake8 backend
+      - name: Run basic API health check
+        run: |
+          source venv/bin/activate
+          python - <<'PYTHON'
+import requests, time
+# start server in background
+import subprocess, os, sys
+srv = subprocess.Popen([sys.executable, 'backend/app.py'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+time.sleep(2)
+print('checking health')
+r = requests.get('http://127.0.0.1:5000/api/health')
+print(r.json())
+srv.terminate()
+PYTHON
+
+default-ci: true
