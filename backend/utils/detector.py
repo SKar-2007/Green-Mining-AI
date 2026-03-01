@@ -9,7 +9,14 @@ except ImportError:
     YOLO = None
 
 class ComponentDetector:
-    def __init__(self, model_path='models/yolov8n.pt'):
+    def __init__(self, model_path=None):
+        # if a custom model path isn't provided, prefer any trained 'best.pt'
+        if model_path is None:
+            candidate = 'models/best.pt'
+            if os.path.exists(candidate):
+                model_path = candidate
+            else:
+                model_path = 'models/yolov8n.pt'
         # load the YOLOv8 model if available, otherwise leave as None and
         # the detection methods will return empty results or dummy data.
         if YOLO is not None:

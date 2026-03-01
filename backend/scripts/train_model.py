@@ -11,11 +11,10 @@ except ImportError:
     exit(1)
 
 import os
-
-
+import argparse
 from pathlib import Path
 
-def train():
+def train(override_epochs=None):
     # locate dataset config relative to repository root (three levels up from this script)
     repo_root = Path(__file__).parent.parent.parent.resolve()
     data_config = repo_root / 'data' / 'components.yaml'
@@ -28,7 +27,8 @@ def train():
     print("Starting training. This may take some time...")
     # if only a handful of images present, reduce epochs for quick runs
     count = sum(len(files) for _, _, files in os.walk(os.path.dirname(data_config)))
-    epochs = 3 if count < 200 else 50
+    default_epochs = 3 if count < 200 else 50
+    epochs = override_epochs if override_epochs is not None else default_epochs
     print(f"Using {epochs} epochs (dataset count {count})")
     results = model.train(
         data=data_config,
@@ -59,4 +59,7 @@ def train():
 
 
 if __name__ == '__main__':
-    train()
+    parser = argparse.ArgumentParser(description='Train YOLOv8 model for Green Mining AI')
+    parser.add_argument('--epochs', type=int, help='override number of epochs')
+    args = parser.parse_args()
+    train(override_epochs=args.epochs)

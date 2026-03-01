@@ -27,9 +27,10 @@ app.config['RESULTS_FOLDER'] = RESULTS_FOLDER
 app.config['MAX_CONTENT_LENGTH'] = 10 * 1024 * 1024  # 10MB max
 
 # Initialize detector and database
-# For MVP the model file can be placed under backend/models/yolov8n.pt or downloaded dynamically
+# Detector will prefer a trained weights file if available (backend/models/best.pt)
+# otherwise it falls back to the supplied default
 
-detector = ComponentDetector(model_path='models/yolov8n.pt')
+detector = ComponentDetector()
 db = DatabaseManager(connection_string='mongodb://localhost:27017/', db_name='green_mining')
 
 

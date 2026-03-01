@@ -15,3 +15,9 @@ results/*
 /data/train/
 /data/val/
 # yaml files (dataset configuration) may be committed intentionally
+
+# model weights and training outputs
+models/
+runs/
+# downloaded base weights
+yolov8n.pt
