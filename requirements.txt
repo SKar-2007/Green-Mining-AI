@@ -26,6 +26,7 @@ scipy>=1.11.4
 # Utilities
 python-dotenv==1.0.0
 requests==2.31.0
+fpdf2==2.7.2
 
 # Development (optional)
 pytest==7.4.3

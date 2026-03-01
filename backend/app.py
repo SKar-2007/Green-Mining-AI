@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory, send_file
+from flask import Flask, request, jsonify, send_from_directory, send_file, Response
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
@@ -141,6 +141,48 @@ def get_statistics():
     try:
         stats = db.get_overall_stats()
         return jsonify(stats), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/scan/<scan_id>/report', methods=['GET'])
+def get_scan_report(scan_id):
+    """Generate a simple PDF report for a scan and return it."""
+    try:
+        scan = db.get_scan(scan_id)
+        if not scan:
+            return jsonify({'error': 'Scan not found'}), 404
+
+        from fpdf import FPDF
+        pdf = FPDF()
+        pdf.set_auto_page_break(auto=True, margin=15)
+        pdf.add_page()
+        pdf.set_font('Arial', 'B', 16)
+        pdf.cell(0, 10, f"Scan Report: {scan_id}", ln=1)
+        pdf.ln(5)
+        # annotated image
+        if scan.get('processed_image'):
+            img_path = os.path.join(app.config['RESULTS_FOLDER'], scan['processed_image'])
+            if os.path.exists(img_path):
+                pdf.image(img_path, w=150)
+                pdf.ln(5)
+        pdf.set_font('Arial', 'B', 12)
+        pdf.cell(0, 10, 'Detections:', ln=1)
+        pdf.set_font('Arial', '', 10)
+        pdf.cell(60, 8, 'Component', border=1)
+        pdf.cell(40, 8, 'Category', border=1)
+        pdf.cell(30, 8, 'Confidence', border=1)
+        pdf.cell(30, 8, 'Value', border=1, ln=1)
+        for det in scan.get('detections', []):
+            pdf.cell(60, 6, det.get('component_name',''), border=1)
+            pdf.cell(40, 6, det.get('component_category',''), border=1)
+            pdf.cell(30, 6, f"{det.get('confidence',0)*100:.1f}%", border=1)
+            pdf.cell(30, 6, f"${det.get('estimated_value',0):.2f}", border=1, ln=1)
+        pdf.ln(5)
+        pdf.cell(0, 10, f"Total components: {scan.get('total_components',0)}", ln=1)
+        pdf.cell(0, 10, f"Estimated value: ${scan.get('total_value',0):.2f}", ln=1)
+        pdf.cell(0, 10, f"Recyclability score: {scan.get('recyclability_score',0)}", ln=1)
+        pdf_bytes = pdf.output(dest='S').encode('latin-1')
+        return Response(pdf_bytes, mimetype='application/pdf', headers={'Content-Disposition': f'attachment; filename={scan_id}_report.pdf'})
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

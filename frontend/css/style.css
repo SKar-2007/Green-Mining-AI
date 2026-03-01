@@ -245,8 +245,31 @@ th {
     text-align: center;
 }
 
+#catalog-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+#catalog-form input {
+    padding: 0.5rem;
+    border: 1px solid var(--border);
+    border-radius: 0.25rem;
+    flex: 1 1 200px;
+}
+
+#catalog-form button {
+    align-self: center;
+}
+
 .hidden {
     display: none !important;
+}
+
+#category-chart {
+    max-width: 600px;
+    margin: 2rem auto;
 }
 
 @media (max-width: 768px) {

@@ -105,12 +105,18 @@ function displayResults(results) {
     results.detections.forEach(det => {
         const row = tbody.insertRow();
         row.innerHTML = `
-            <td>${det.component}</td>
+            <td>${det.component_name || det.component}</td>
+            <td>${det.component_category || ''}</td>
             <td>${(det.confidence * 100).toFixed(1)}%</td>
             <td>$${det.estimated_value.toFixed(2)}</td>
         `;
     });
     
+    // enable report download
+    document.getElementById('download-report').onclick = () => {
+        window.open(`${API_BASE}/scan/${results.scan_id}/report`, '_blank');
+    };
+
     // Update global stats
     fetchGlobalStats();
 }
@@ -123,9 +129,36 @@ async function fetchGlobalStats() {
         document.getElementById('global-scans').textContent = stats.total_scans;
         document.getElementById('global-components').textContent = stats.total_components_detected;
         document.getElementById('global-value').textContent = `$${stats.total_value_estimated.toFixed(2)}`;
+        
+        if (stats.category_breakdown) {
+            renderCategoryChart(stats.category_breakdown);
+        }
     } catch (error) {
         console.error('Error fetching stats:', error);
     }
+}
+
+function renderCategoryChart(breakdown) {
+    const labels = Object.keys(breakdown);
+    const data = Object.values(breakdown);
+    const ctx = document.getElementById('category-chart').getContext('2d');
+    document.getElementById('category-chart').classList.remove('hidden');
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels,
+            datasets: [{
+                data,
+                backgroundColor: labels.map((_,i) => `hsl(${(i*60)%360},70%,60%)`)
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { position: 'bottom' }
+            }
+        }
+    });
 }
 
 function resetUpload() {
