@@ -81,6 +81,21 @@ class DatabaseManager:
                     return s
             return None
         return self.scans.find_one({'scan_id': scan_id})
+
+    def get_component_by_category(self, category):
+        """Return first component entry matching the given category/name"""
+        if self.use_memory:
+            for c in self._mem_components:
+                if c.get('category') == category or c.get('name') == category:
+                    return c
+            return None
+        return self.components.find_one({'$or': [{'category': category}, {'name': category}]})
+
+    def list_components(self):
+        """Return list of all component definitions"""
+        if self.use_memory:
+            return list(self._mem_components)
+        return list(self.components.find({}))
     
     def get_overall_stats(self):
         """Get aggregate statistics"""
@@ -89,13 +104,21 @@ class DatabaseManager:
             total_components = sum(s.get('total_components', 0) for s in self._mem_scans)
             total_value = sum(s.get('total_value', 0) for s in self._mem_scans)
             avg_recyclability = (sum(s.get('recyclability_score', 0) for s in self._mem_scans) / total_scans) if total_scans else 0
+            # category breakdown for mem
+            breakdown = {}
+            for s in self._mem_scans:
+                for det in s.get('detections', []):
+                    cat = det.get('component_category', det.get('component'))
+                    breakdown[cat] = breakdown.get(cat, 0) + 1
             return {
                 'total_scans': total_scans,
                 'total_components_detected': total_components,
                 'total_value_estimated': round(total_value, 2),
-                'avg_recyclability_score': round(avg_recyclability, 1)
+                'avg_recyclability_score': round(avg_recyclability, 1),
+                'category_breakdown': breakdown
             }
-        total_scans = self.scans.count_documents({})
+
+        # compute totals with aggregation
         pipeline = [
             {
                 '$group': {
@@ -113,12 +136,14 @@ class DatabaseManager:
                 'total_scans': total_scans,
                 'total_components_detected': stats.get('total_components', 0),
                 'total_value_estimated': round(stats.get('total_value', 0), 2),
-                'avg_recyclability_score': round(stats.get('avg_recyclability', 0), 1)
+                'avg_recyclability_score': round(stats.get('avg_recyclability', 0), 1),
+                'category_breakdown': breakdown
             }
         else:
             return {
                 'total_scans': 0,
                 'total_components_detected': 0,
                 'total_value_estimated': 0,
-                'avg_recyclability_score': 0
+                'avg_recyclability_score': 0,
+                'category_breakdown': breakdown
             }

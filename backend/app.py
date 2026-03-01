@@ -73,6 +73,22 @@ def upload_scan():
         annotated_path = os.path.join(app.config['RESULTS_FOLDER'], f"{scan_id}_annotated.jpg")
         detector.save_annotated_image(results, annotated_path)
         
+        # enrich detections with component database info
+        enriched = []
+        for det in results['detections']:
+            cat = det.get('component')
+            comp_entry = db.get_component_by_category(cat)
+            if comp_entry:
+                det['component_name'] = comp_entry.get('name', cat)
+                det['component_category'] = comp_entry.get('category', cat)
+                det['estimated_value'] = comp_entry.get('market_value_usd', det.get('estimated_value', 0))
+                det['recyclability_score'] = comp_entry.get('recyclability_score', det.get('recyclability_score', 0))
+            else:
+                det['component_name'] = cat
+                det['component_category'] = cat
+            enriched.append(det)
+        results['detections'] = enriched
+
         # Calculate total value and stats
         total_value = sum([det['estimated_value'] for det in results['detections']])
         recyclability = detector.calculate_recyclability(results['detections'])
@@ -125,6 +141,42 @@ def get_statistics():
     try:
         stats = db.get_overall_stats()
         return jsonify(stats), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# component catalog endpoints
+@app.route('/api/components', methods=['GET'])
+def list_components():
+    try:
+        comps = db.list_components()
+        # convert ObjectId to str if present
+        for c in comps:
+            if '_id' in c:
+                c['_id'] = str(c['_id'])
+        return jsonify(comps), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/components', methods=['POST'])
+def add_component():
+    data = request.json
+    if not data or 'name' not in data or 'category' not in data:
+        return jsonify({'error': 'name and category required'}), 400
+    try:
+        # basic validation
+        comp = {
+            'name': data['name'],
+            'category': data['category'],
+            'materials': data.get('materials', {}),
+            'market_value_usd': data.get('market_value_usd', 0),
+            'recyclability_score': data.get('recyclability_score', 0),
+            'created_at': datetime.now()
+        }
+        if db.use_memory:
+            db._mem_components.append(comp)
+        else:
+            db.components.insert_one(comp)
+        return jsonify({'status': 'success'}), 201
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 

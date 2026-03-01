@@ -27,12 +27,25 @@ def test_stats():
     print(f"Stats: {json.dumps(response.json(), indent=2)}")
 
 
+def test_components():
+    response = requests.get(f"{API_URL}/components")
+    print(f"Components: {json.dumps(response.json(), indent=2)}")
+
+
 if __name__ == "__main__":
     print("Testing Green Mining AI API")
-    test_health()
-    # replace with a real sample image path
-    # scan_id = test_upload("sample_pcb.jpg")
-    # if scan_id:
-    #     time.sleep(2)  # wait for processing
-    #     test_get_results(scan_id)
-    #     test_stats()
+    # start server in background
+    import subprocess, os, sys
+    srv = subprocess.Popen([sys.executable, 'backend/app.py'], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+    time.sleep(2)
+    try:
+        test_health()
+        test_components()
+        # replace with a real sample image path
+        # scan_id = test_upload("sample_pcb.jpg")
+        # if scan_id:
+        #     time.sleep(2)  # wait for processing
+        #     test_get_results(scan_id)
+        #     test_stats()
+    finally:
+        srv.terminate()

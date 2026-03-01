@@ -60,7 +60,14 @@ This repository contains the MVP for the Green Mining AI project developed durin
    ```
    (this also brings up a MongoDB container)
 
-## 🛠️ Project structure
+## � API Endpoints
+- `POST /api/scan` – upload an image (multipart/form-data field `image`).
+- `GET /api/scan/<scan_id>` – retrieve scan results.
+- `GET /api/stats` – overall statistics, including per-category counts.
+- `GET /api/components` – list component catalog entries.
+- `POST /api/components` – add a new component definition (JSON body).
+
+## �🛠️ Project structure
 
 ## 🧠 Training the YOLO model
 
