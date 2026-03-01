@@ -111,8 +111,9 @@ those directories.
 
 If the script cannot import `ultralytics` it will print an error and exit.
 
-Training outputs a new weights file and also exports a `.pt` model to
-`backend/models` when finished.
+Training outputs a new weights file and also copies the best `.pt` model to
+`backend/models/best.pt`. The `models` directory and any large weights are
+ignored by git, so you can safely delete them or retrain as needed.
 
 
 ## 🛠️ Project structure
