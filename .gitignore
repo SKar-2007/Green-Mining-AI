@@ -1,0 +1,17 @@
+# environment
+.venv/
+
+# Python
+__pycache__/
+*.pyc
+
+# uploads/results
+uploads/*
+results/*
+!uploads/.gitkeep
+!results/.gitkeep
+
+# Generated datasets (ignore image folders but keep config)
+/data/train/
+/data/val/
+# yaml files (dataset configuration) may be committed intentionally

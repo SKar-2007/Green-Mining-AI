@@ -26,19 +26,19 @@ This repository contains the MVP for the Green Mining AI project developed durin
 
 2. **Python environment** (recommended Python 3.11)
    ```bash
-   python3.11 -m venv .venv     # install python3.11 if you don't have it
+   python3.11 -m venv .venv     # install python3.11 if you don't have it (3.14 also works now)
    source .venv/bin/activate
    ```
-   If you cannot create a 3.11 venv, install the core packages manually:
+   If you prefer to skip the venv step, install the core packages manually:
    ```bash
-   pip install flask flask-cors pymongo opencv-python pillow numpy pandas requests
+   pip install flask flask-cors pymongo opencv-python pillow numpy requests
    ```
 
 3. **Install dependencies**
    ```bash
    pip install -r requirements.txt --break-system-packages
    ```
-   *The full requirements include YOLO/torch which require Python ≤3.11.*
+   *The full requirements include YOLO/torch which have been tested with Python 3.11 through 3.14.*
 
 4. **Start MongoDB**
    ```bash
@@ -68,7 +68,8 @@ This repository contains the MVP for the Green Mining AI project developed durin
 
 If you don't yet have real component photos, you can quickly create a
 synthetic dataset to verify training and inference. A helper script is
-provided:
+provided; it places images under `images/` and corresponding label files
+in a parallel `labels/` directory, matching the structure YOLO expects.
 
 ```bash
 # create 100 training images and 20 validation images
@@ -76,13 +77,13 @@ python backend/scripts/generate_synthetic_data.py --output data/train/images --c
 python backend/scripts/generate_synthetic_data.py --output data/val/images --count 20
 ```
 
-The script draws random colored rectangles and writes matching YOLO
-labels. Replace these with actual images once available.
+The script draws random colored rectangles and writes YOLO-format labels.
+Replace these with actual photos once available.
 
 
 ## 🛠️ Project structure
 
-Training requires the `ultralytics` package which is only compatible with Python 3.11.
+Training requires the `ultralytics` package. Recent versions (8.4.19+) work on Python 3.11–3.14.
 There are two recommended ways to run the training script:
 
 1. **Using the included Docker container** (preferred)

@@ -9,18 +9,19 @@ Werkzeug==3.0.1
 pymongo==4.6.1
 
 # AI/ML
-ultralytics==8.1.20
-torch==2.1.2
-torchvision==0.16.2
+# Versions are kept loose to support Python 3.11 through 3.14
+ultralytics>=8.4.19
+torch>=2.10.0
+torchvision>=0.25.0
 
 # Image Processing
-opencv-python==4.9.0.80
-Pillow==10.2.0
-numpy==1.26.3
-scipy==1.11.4
+opencv-python>=4.9.0
+Pillow>=10.2.0
+numpy>=1.26.3
+scipy>=1.11.4
 
 # Data Processing
-pandas==2.1.4
+# (pandas removed - not needed by current code; avoids build issues on Python 3.14)
 
 # Utilities
 python-dotenv==1.0.0

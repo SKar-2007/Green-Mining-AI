@@ -43,8 +43,10 @@ def make_image(path, num_boxes=5):
         y_center = (y + h / 2) / size
         boxes.append((class_id, x_center, y_center, w / size, h / size))
     img.save(path)
-    # write label file
-    label_path = path.replace('.png', '.txt')
+    # write label file alongside in a 'labels' subdirectory as expected by YOLO
+    label_dir = os.path.join(os.path.dirname(path), '..', 'labels')
+    os.makedirs(label_dir, exist_ok=True)
+    label_path = os.path.join(label_dir, os.path.basename(path).replace('.png', '.txt'))
     with open(label_path, 'w') as f:
         for box in boxes:
             f.write(' '.join(str(x) for x in box) + '\n')

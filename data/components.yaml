@@ -1,0 +1,11 @@
+train: train
+val: val
+names:
+  0: IC
+  1: Capacitor
+  2: Resistor
+  3: Transistor
+  4: Connector
+  5: PCB_Trace
+  6: Heat_Sink
+  7: Crystal

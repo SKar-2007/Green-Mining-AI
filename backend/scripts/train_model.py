@@ -13,9 +13,13 @@ except ImportError:
 import os
 
 
+from pathlib import Path
+
 def train():
-    data_config = os.path.join(os.getcwd(), '..', '..', 'data', 'components.yaml')
-    if not os.path.exists(data_config):
+    # locate dataset config relative to repository root (three levels up from this script)
+    repo_root = Path(__file__).parent.parent.parent.resolve()
+    data_config = repo_root / 'data' / 'components.yaml'
+    if not data_config.exists():
         print(f"Dataset config not found at {data_config}. Please create the data folder and add images/labels.")
         return
 
@@ -39,11 +43,19 @@ def train():
     print(f"mAP50: {metrics.box.map50}")
     print(f"mAP50-95: {metrics.box.map}")
 
-    # save best model weight to the backend/models folder
-    export_path = os.path.join('..', 'models')
-    os.makedirs(export_path, exist_ok=True)
-    model.export(format='pt', imgsz=640, directory=export_path)
-    print(f"Model exported to {export_path}")
+    # copy the best weights file into backend/models for easy access
+    export_path = Path(__file__).parent.parent / 'models'
+    export_path.mkdir(exist_ok=True)
+    # look for ultralytics output directory
+    import glob, shutil
+    weight_files = glob.glob('runs/detect/*/weights/best.pt')
+    if weight_files:
+        src = weight_files[-1]
+        dst = export_path / 'best.pt'
+        shutil.copy(src, dst)
+        print(f"Copied best model to {dst}")
+    else:
+        print("Warning: could not find best.pt in runs/detect; training may have failed to save weights.")
 
 
 if __name__ == '__main__':
