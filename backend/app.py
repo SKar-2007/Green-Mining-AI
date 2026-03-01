@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, send_from_directory
+from flask import Flask, request, jsonify, send_from_directory, send_file
 from flask_cors import CORS
 from werkzeug.utils import secure_filename
 import os
@@ -8,8 +8,14 @@ from datetime import datetime
 from utils.detector import ComponentDetector
 from database.db_manager import DatabaseManager
 
-app = Flask(__name__)
+# serve frontend files from project/frontend
+app = Flask(__name__, static_folder='../frontend', static_url_path='')
 CORS(app)
+
+# root route returns index.html from frontend
+@app.route('/')
+def root():
+    return app.send_static_file('index.html')
 
 # Configuration
 UPLOAD_FOLDER = 'uploads'
